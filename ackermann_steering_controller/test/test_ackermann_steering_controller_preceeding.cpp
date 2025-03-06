@@ -57,11 +57,13 @@ TEST_F(AckermannSteeringControllerTest, check_exported_interfaces)
   auto cmd_if_conf = controller_->command_interface_configuration();
   ASSERT_EQ(cmd_if_conf.names.size(), joint_command_values_.size());
   EXPECT_EQ(
-    cmd_if_conf.names[CMD_TRACTION_RIGHT_WHEEL],
-    preceeding_prefix_ + "/" + rear_wheels_names_[0] + "/" + traction_interface_name_);
+    cmd_if_conf.names[CMD_TRACTION_RIGHT_WHEEL_FRONT],
+    preceeding_prefix_ + "/" + rear_wheels_names_[0] + "/" +
+      traction_interface_name_);  // modified by Tomas
   EXPECT_EQ(
-    cmd_if_conf.names[CMD_TRACTION_LEFT_WHEEL],
-    preceeding_prefix_ + "/" + rear_wheels_names_[1] + "/" + traction_interface_name_);
+    cmd_if_conf.names[CMD_TRACTION_LEFT_WHEEL_FRONT],
+    preceeding_prefix_ + "/" + rear_wheels_names_[1] + "/" +
+      traction_interface_name_);  // modified by Tomas
   EXPECT_EQ(
     cmd_if_conf.names[CMD_STEER_RIGHT_WHEEL],
     preceeding_prefix_ + "/" + front_wheels_names_[0] + "/" + steering_interface_name_);
@@ -73,11 +75,13 @@ TEST_F(AckermannSteeringControllerTest, check_exported_interfaces)
   auto state_if_conf = controller_->state_interface_configuration();
   ASSERT_EQ(state_if_conf.names.size(), joint_state_values_.size());
   EXPECT_EQ(
-    state_if_conf.names[STATE_TRACTION_RIGHT_WHEEL],
-    controller_->rear_wheels_state_names_[0] + "/" + traction_interface_name_);
+    state_if_conf.names[STATE_TRACTION_RIGHT_WHEEL_FRONT],
+    controller_->rear_wheels_state_names_[0] + "/" +
+      traction_interface_name_);  // modified by Tomas
   EXPECT_EQ(
-    state_if_conf.names[STATE_TRACTION_LEFT_WHEEL],
-    controller_->rear_wheels_state_names_[1] + "/" + traction_interface_name_);
+    state_if_conf.names[STATE_TRACTION_LEFT_WHEEL_FRONT],
+    controller_->rear_wheels_state_names_[1] + "/" +
+      traction_interface_name_);  // modified by Tomas
   EXPECT_EQ(
     state_if_conf.names[STATE_STEER_RIGHT_WHEEL],
     controller_->front_wheels_state_names_[0] + "/" + steering_interface_name_);

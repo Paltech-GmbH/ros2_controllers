@@ -55,10 +55,10 @@ TEST_F(AckermannSteeringControllerTest, check_exported_interfaces)
   auto cmd_if_conf = controller_->command_interface_configuration();
   ASSERT_EQ(cmd_if_conf.names.size(), joint_command_values_.size());
   EXPECT_EQ(
-    cmd_if_conf.names[CMD_TRACTION_RIGHT_WHEEL],
+    cmd_if_conf.names[CMD_TRACTION_RIGHT_WHEEL_FRONT],  // modify by Tomas
     rear_wheels_names_[0] + "/" + traction_interface_name_);
   EXPECT_EQ(
-    cmd_if_conf.names[CMD_TRACTION_LEFT_WHEEL],
+    cmd_if_conf.names[CMD_TRACTION_LEFT_WHEEL_FRONT],  // modify by Tomas
     rear_wheels_names_[1] + "/" + traction_interface_name_);
   EXPECT_EQ(
     cmd_if_conf.names[CMD_STEER_RIGHT_WHEEL],
@@ -71,10 +71,10 @@ TEST_F(AckermannSteeringControllerTest, check_exported_interfaces)
   auto state_if_conf = controller_->state_interface_configuration();
   ASSERT_EQ(state_if_conf.names.size(), joint_state_values_.size());
   EXPECT_EQ(
-    state_if_conf.names[STATE_TRACTION_RIGHT_WHEEL],
+    state_if_conf.names[STATE_TRACTION_RIGHT_WHEEL_FRONT],  // modify by Tomas
     controller_->rear_wheels_state_names_[0] + "/" + traction_interface_name_);
   EXPECT_EQ(
-    state_if_conf.names[STATE_TRACTION_LEFT_WHEEL],
+    state_if_conf.names[STATE_TRACTION_LEFT_WHEEL_FRONT],  // modify by Tomas
     controller_->rear_wheels_state_names_[1] + "/" + traction_interface_name_);
   EXPECT_EQ(
     state_if_conf.names[STATE_STEER_RIGHT_WHEEL],
@@ -175,11 +175,13 @@ TEST_F(AckermannSteeringControllerTest, test_update_logic)
 
   // we test with open_loop=false, but steering angle was not updated (is zero) -> same commands
   EXPECT_NEAR(
-    controller_->command_interfaces_[CMD_TRACTION_RIGHT_WHEEL].get_value(), 0.22222222222222224,
-    COMMON_THRESHOLD);
+    controller_->command_interfaces_[CMD_TRACTION_RIGHT_WHEEL_FRONT].get_value(),
+    0.22222222222222224,
+    COMMON_THRESHOLD);  // modify by Tomas
   EXPECT_NEAR(
-    controller_->command_interfaces_[CMD_TRACTION_LEFT_WHEEL].get_value(), 0.22222222222222224,
-    COMMON_THRESHOLD);
+    controller_->command_interfaces_[CMD_TRACTION_LEFT_WHEEL_FRONT].get_value(),
+    0.22222222222222224,
+    COMMON_THRESHOLD);  // modify by Tomas
   EXPECT_NEAR(
     controller_->command_interfaces_[CMD_STEER_RIGHT_WHEEL].get_value(), 1.4179821977774734,
     COMMON_THRESHOLD);
@@ -215,11 +217,13 @@ TEST_F(AckermannSteeringControllerTest, test_update_logic_chained)
 
   // we test with open_loop=false, but steering angle was not updated (is zero) -> same commands
   EXPECT_NEAR(
-    controller_->command_interfaces_[STATE_TRACTION_RIGHT_WHEEL].get_value(), 0.22222222222222224,
-    COMMON_THRESHOLD);
+    controller_->command_interfaces_[STATE_TRACTION_RIGHT_WHEEL_FRONT].get_value(),
+    0.22222222222222224,
+    COMMON_THRESHOLD);  // modify by Tomas
   EXPECT_NEAR(
-    controller_->command_interfaces_[STATE_TRACTION_LEFT_WHEEL].get_value(), 0.22222222222222224,
-    COMMON_THRESHOLD);
+    controller_->command_interfaces_[STATE_TRACTION_LEFT_WHEEL_FRONT].get_value(),
+    0.22222222222222224,
+    COMMON_THRESHOLD);  // modify by Tomas
   EXPECT_NEAR(
     controller_->command_interfaces_[STATE_STEER_RIGHT_WHEEL].get_value(), 1.4179821977774734,
     COMMON_THRESHOLD);
@@ -251,8 +255,8 @@ TEST_F(AckermannSteeringControllerTest, receive_message_and_publish_updated_stat
   ControllerStateMsg msg;
   subscribe_and_get_messages(msg);
 
-  EXPECT_EQ(msg.linear_velocity_command[STATE_TRACTION_RIGHT_WHEEL], 1.1);
-  EXPECT_EQ(msg.linear_velocity_command[STATE_TRACTION_LEFT_WHEEL], 3.3);
+  EXPECT_EQ(msg.linear_velocity_command[STATE_TRACTION_RIGHT_WHEEL_FRONT], 1.1);  // modify by Tomas
+  EXPECT_EQ(msg.linear_velocity_command[STATE_TRACTION_LEFT_WHEEL_FRONT], 3.3);   // modify by Tomas
   EXPECT_EQ(msg.steering_angle_command[0], 2.2);
   EXPECT_EQ(msg.steering_angle_command[1], 4.4);
 
@@ -265,11 +269,13 @@ TEST_F(AckermannSteeringControllerTest, receive_message_and_publish_updated_stat
 
   // we test with open_loop=false, but steering angle was not updated (is zero) -> same commands
   EXPECT_NEAR(
-    controller_->command_interfaces_[CMD_TRACTION_RIGHT_WHEEL].get_value(), 0.22222222222222224,
-    COMMON_THRESHOLD);
+    controller_->command_interfaces_[CMD_TRACTION_RIGHT_WHEEL_FRONT].get_value(),
+    0.22222222222222224,
+    COMMON_THRESHOLD);  // modify by Tomas
   EXPECT_NEAR(
-    controller_->command_interfaces_[CMD_TRACTION_LEFT_WHEEL].get_value(), 0.22222222222222224,
-    COMMON_THRESHOLD);
+    controller_->command_interfaces_[CMD_TRACTION_LEFT_WHEEL_FRONT].get_value(),
+    0.22222222222222224,
+    COMMON_THRESHOLD);  // modify by Tomas
   EXPECT_NEAR(
     controller_->command_interfaces_[CMD_STEER_RIGHT_WHEEL].get_value(), 1.4179821977774734,
     COMMON_THRESHOLD);
@@ -281,9 +287,11 @@ TEST_F(AckermannSteeringControllerTest, receive_message_and_publish_updated_stat
 
   // we test with open_loop=false, but steering angle was not updated (is zero) -> same commands
   EXPECT_NEAR(
-    msg.linear_velocity_command[CMD_TRACTION_RIGHT_WHEEL], 0.22222222222222224, COMMON_THRESHOLD);
+    msg.linear_velocity_command[CMD_TRACTION_RIGHT_WHEEL_FRONT], 0.22222222222222224,
+    COMMON_THRESHOLD);  // modified by Tomas
   EXPECT_NEAR(
-    msg.linear_velocity_command[CMD_TRACTION_LEFT_WHEEL], 0.22222222222222224, COMMON_THRESHOLD);
+    msg.linear_velocity_command[CMD_TRACTION_LEFT_WHEEL_FRONT], 0.22222222222222224,
+    COMMON_THRESHOLD);  // modified by Tomas
   EXPECT_NEAR(msg.steering_angle_command[0], 1.4179821977774734, COMMON_THRESHOLD);
   EXPECT_NEAR(msg.steering_angle_command[1], 1.4179821977774734, COMMON_THRESHOLD);
 }

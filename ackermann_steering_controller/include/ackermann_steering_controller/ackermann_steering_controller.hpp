@@ -27,19 +27,23 @@
 namespace ackermann_steering_controller
 {
 // name constants for state interfaces
-static constexpr size_t STATE_TRACTION_RIGHT_WHEEL = 0;
-static constexpr size_t STATE_TRACTION_LEFT_WHEEL = 1;
-static constexpr size_t STATE_STEER_RIGHT_WHEEL = 2;
-static constexpr size_t STATE_STEER_LEFT_WHEEL = 3;
+static constexpr size_t STATE_TRACTION_RIGHT_WHEEL_FRONT = 0;
+static constexpr size_t STATE_TRACTION_LEFT_WHEEL_FRONT = 1;
+static constexpr size_t STATE_TRACTION_RIGHT_WHEEL_REAR = 2;  // add by Tomas
+static constexpr size_t STATE_TRACTION_LEFT_WHEEL_REAR = 3;   // add by Tomas
+static constexpr size_t STATE_STEER_RIGHT_WHEEL = 4;
+static constexpr size_t STATE_STEER_LEFT_WHEEL = 5;  // modify by Tomas
 
 // name constants for command interfaces
-static constexpr size_t CMD_TRACTION_RIGHT_WHEEL = 0;
-static constexpr size_t CMD_TRACTION_LEFT_WHEEL = 1;
-static constexpr size_t CMD_STEER_RIGHT_WHEEL = 2;
-static constexpr size_t CMD_STEER_LEFT_WHEEL = 3;
+static constexpr size_t CMD_TRACTION_RIGHT_WHEEL_FRONT = 0;
+static constexpr size_t CMD_TRACTION_LEFT_WHEEL_FRONT = 1;
+static constexpr size_t CMD_TRACTION_RIGHT_WHEEL_REAR = 2;
+static constexpr size_t CMD_TRACTION_LEFT_WHEEL_REAR = 3;
+static constexpr size_t CMD_STEER_RIGHT_WHEEL = 4;
+static constexpr size_t CMD_STEER_LEFT_WHEEL = 5;  // Modify by tomas
 
-static constexpr size_t NR_STATE_ITFS = 4;
-static constexpr size_t NR_CMD_ITFS = 4;
+static constexpr size_t NR_STATE_ITFS = 6;  // 6 modify by Tomas
+static constexpr size_t NR_CMD_ITFS = 6;    // 6 modify by Tomas
 static constexpr size_t NR_REF_ITFS = 2;
 
 class AckermannSteeringController : public steering_controllers_library::SteeringControllersLibrary

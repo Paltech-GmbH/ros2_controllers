@@ -167,16 +167,16 @@ bool SteeringOdometry::update_from_velocity(
 {
   // overdetermined, we take the average
   const double right_steer_pos_est = std::atan(
-    wheelbase_ * std::tan(right_steer_pos) /
-    (wheelbase_ - wheel_track_ / 2 * std::tan(right_steer_pos)));
+    wheelbase_ * std::tan(-right_steer_pos) /
+    (wheelbase_ - wheel_track_ / 2 * std::tan(-right_steer_pos)));  // modified by Tomas
   const double left_steer_pos_est = std::atan(
-    wheelbase_ * std::tan(left_steer_pos) /
-    (wheelbase_ + wheel_track_ / 2 * std::tan(left_steer_pos)));
+    wheelbase_ * std::tan(-left_steer_pos) /
+    (wheelbase_ + wheel_track_ / 2 * std::tan(-left_steer_pos)));  // modified by Tomas
   steer_pos_ = (right_steer_pos_est + left_steer_pos_est) * 0.5;
 
   double linear_velocity = get_linear_velocity_double_traction_axle(
     right_traction_wheel_vel, left_traction_wheel_vel, steer_pos_);
-  const double angular_velocity = steer_pos_ * linear_velocity / wheelbase_;
+  const double angular_velocity = steer_pos_ * linear_velocity / wheelbase_;  // Modified by Tomas
 
   return update_odometry(linear_velocity, angular_velocity, dt);
 }
@@ -213,7 +213,16 @@ void SteeringOdometry::set_odometry_type(const unsigned int type)
 double SteeringOdometry::convert_twist_to_steering_angle(double v_bx, double omega_bz)
 {
   // phi can be nan if both v_bx and omega_bz are zero
-  const auto phi = std::atan(omega_bz * wheelbase_ / v_bx);
+  double phi;
+  if (config_type_ == ACKERMANN_REAR_CONFIG)
+  {
+    phi = -std::atan(omega_bz * wheelbase_ / v_bx);
+  }
+  else
+  {
+    phi = std::atan(omega_bz * wheelbase_ / v_bx);
+  }
+
   return std::isfinite(phi) ? phi : 0.0;
 }
 
@@ -323,6 +332,45 @@ std::tuple<std::vector<double>, std::vector<double>> SteeringOdometry::get_comma
       const double alpha_l =
         std::atan2(numerator, denominator_first_member - denominator_second_member);
       steering_commands = {alpha_r, alpha_l};
+    }
+    return std::make_tuple(traction_commands, steering_commands);
+  }
+  else if (config_type_ == ACKERMANN_REAR_CONFIG)
+  {
+    std::vector<double> traction_commands;
+    std::vector<double> steering_commands;
+    if (is_close_to_zero(phi_IK))
+    {
+      traction_commands = {Ws, Ws, Ws, Ws};
+      steering_commands = {phi, phi};
+    }
+    else
+    {
+      // Adjust turning radius based on front axle reference
+      const double turning_radius = abs(wheelbase_ / std::tan(phi_IK));
+      // Adjust wheel speeds based on rear track width
+      const double Wr_front = Ws * (turning_radius + wheel_track_ * 0.5) / turning_radius;
+      const double Wl_front = Ws * (turning_radius - wheel_track_ * 0.5) / turning_radius;
+      const double Wr_rear =
+        Ws * sqrt(std::pow((turning_radius + wheel_track_ * 0.5), 2) + std::pow(wheelbase_, 2)) /
+        turning_radius;
+      const double Wl_rear =
+        Ws * sqrt(std::pow((turning_radius - wheel_track_ * 0.5), 2) + std::pow(wheelbase_, 2)) /
+        turning_radius;
+
+      traction_commands = {Wr_front, Wl_front, Wr_rear, Wl_rear};
+
+      const double numerator = 2 * wheelbase_ * std::sin(phi);
+      const double denominator_first_member = 2 * wheelbase_ * std::cos(phi);
+      const double denominator_second_member = wheel_track_ * std::sin(phi);
+
+      // Apply steering angles to the rear wheels instead
+      const double alpha_r =
+        std::atan2(numerator, denominator_first_member + denominator_second_member);
+      const double alpha_l =
+        std::atan2(numerator, denominator_first_member - denominator_second_member);
+
+      steering_commands = {alpha_l, alpha_r};  // Rear wheels now steer
     }
     return std::make_tuple(traction_commands, steering_commands);
   }

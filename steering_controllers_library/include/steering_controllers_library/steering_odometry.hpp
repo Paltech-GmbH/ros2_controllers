@@ -30,6 +30,7 @@ namespace steering_odometry
 const unsigned int BICYCLE_CONFIG = 0;
 const unsigned int TRICYCLE_CONFIG = 1;
 const unsigned int ACKERMANN_CONFIG = 2;
+const unsigned int ACKERMANN_REAR_CONFIG = 3;
 
 inline bool is_close_to_zero(double val) { return std::fabs(val) < 1e-6; }
 
