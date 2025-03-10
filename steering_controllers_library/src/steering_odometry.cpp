@@ -167,11 +167,11 @@ bool SteeringOdometry::update_from_velocity(
 {
   // overdetermined, we take the average
   const double right_steer_pos_est = std::atan(
-    wheelbase_ * std::tan(-right_steer_pos) /
-    (wheelbase_ - wheel_track_ / 2 * std::tan(-right_steer_pos)));  // modified by Tomas
+    wheelbase_ * std::tan(right_steer_pos) /
+    (wheelbase_ - wheel_track_ / 2 * std::tan(right_steer_pos)));  // modified by Tomas
   const double left_steer_pos_est = std::atan(
-    wheelbase_ * std::tan(-left_steer_pos) /
-    (wheelbase_ + wheel_track_ / 2 * std::tan(-left_steer_pos)));  // modified by Tomas
+    wheelbase_ * std::tan(left_steer_pos) /
+    (wheelbase_ + wheel_track_ / 2 * std::tan(left_steer_pos)));  // modified by Tomas
   steer_pos_ = (right_steer_pos_est + left_steer_pos_est) * 0.5;
 
   double linear_velocity = get_linear_velocity_double_traction_axle(
@@ -214,14 +214,8 @@ double SteeringOdometry::convert_twist_to_steering_angle(double v_bx, double ome
 {
   // phi can be nan if both v_bx and omega_bz are zero
   double phi;
-  if (config_type_ == ACKERMANN_REAR_CONFIG)
-  {
-    phi = -std::atan(omega_bz * wheelbase_ / v_bx);
-  }
-  else
-  {
-    phi = std::atan(omega_bz * wheelbase_ / v_bx);
-  }
+
+  phi = std::atan(omega_bz * wheelbase_ / v_bx);
 
   return std::isfinite(phi) ? phi : 0.0;
 }
@@ -347,16 +341,14 @@ std::tuple<std::vector<double>, std::vector<double>> SteeringOdometry::get_comma
     else
     {
       // Adjust turning radius based on front axle reference
-      const double turning_radius = abs(wheelbase_ / std::tan(phi_IK));
+      const double turning_radius = wheelbase_ / std::tan(phi_IK);
       // Adjust wheel speeds based on rear track width
       const double Wr_front = Ws * (turning_radius + wheel_track_ * 0.5) / turning_radius;
       const double Wl_front = Ws * (turning_radius - wheel_track_ * 0.5) / turning_radius;
       const double Wr_rear =
-        Ws * sqrt(std::pow((turning_radius + wheel_track_ * 0.5), 2) + std::pow(wheelbase_, 2)) /
-        turning_radius;
+        Ws * (turning_radius + wheel_track_ * 0.5) / turning_radius * std::cos(phi_IK);
       const double Wl_rear =
-        Ws * sqrt(std::pow((turning_radius - wheel_track_ * 0.5), 2) + std::pow(wheelbase_, 2)) /
-        turning_radius;
+        Ws * (turning_radius - wheel_track_ * 0.5) / turning_radius * std::cos(phi_IK);
 
       traction_commands = {Wr_front, Wl_front, Wr_rear, Wl_rear};
 
@@ -366,11 +358,11 @@ std::tuple<std::vector<double>, std::vector<double>> SteeringOdometry::get_comma
 
       // Apply steering angles to the rear wheels instead
       const double alpha_r =
-        std::atan2(numerator, denominator_first_member + denominator_second_member);
+        -std::atan2(numerator, denominator_first_member + denominator_second_member);
       const double alpha_l =
-        std::atan2(numerator, denominator_first_member - denominator_second_member);
+        -std::atan2(numerator, denominator_first_member - denominator_second_member);
 
-      steering_commands = {alpha_l, alpha_r};  // Rear wheels now steer
+      steering_commands = {alpha_r, alpha_l};  // Rear wheels now steer
     }
     return std::make_tuple(traction_commands, steering_commands);
   }
