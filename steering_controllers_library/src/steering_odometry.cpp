@@ -346,9 +346,9 @@ std::tuple<std::vector<double>, std::vector<double>> SteeringOdometry::get_comma
       const double Wr_front = Ws * (turning_radius + wheel_track_ * 0.5) / turning_radius;
       const double Wl_front = Ws * (turning_radius - wheel_track_ * 0.5) / turning_radius;
       const double Wr_rear =
-        Ws * (turning_radius + wheel_track_ * 0.5) / turning_radius * std::cos(phi_IK);
+        Ws * (turning_radius + wheel_track_ * 0.5) / (turning_radius * std::cos(phi_IK));
       const double Wl_rear =
-        Ws * (turning_radius - wheel_track_ * 0.5) / turning_radius * std::cos(phi_IK);
+        Ws * (turning_radius - wheel_track_ * 0.5) / (turning_radius * std::cos(phi_IK));
 
       traction_commands = {Wr_front, Wl_front, Wr_rear, Wl_rear};
 
