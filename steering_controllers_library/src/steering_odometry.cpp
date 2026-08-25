@@ -340,15 +340,30 @@ std::tuple<std::vector<double>, std::vector<double>> SteeringOdometry::get_comma
     }
     else
     {
-      // Adjust turning radius based on front axle reference
+      // Rear steering: the ICR lies on the line through the FRONT (rigid) axle,
+      // at lateral distance turning_radius from the centreline. Each wheel's
+      // speed is proportional to its own distance from that point.
       const double turning_radius = wheelbase_ / std::tan(phi_IK);
-      // Adjust wheel speeds based on rear track width
-      const double Wr_front = Ws * (turning_radius + wheel_track_ * 0.5) / turning_radius;
-      const double Wl_front = Ws * (turning_radius - wheel_track_ * 0.5) / turning_radius;
+
+      // Lateral offset of each side from the ICR, signed like turning_radius.
+      const double lat_r = turning_radius + wheel_track_ * 0.5;
+      const double lat_l = turning_radius - wheel_track_ * 0.5;
+
+      // Front wheels sit ON the ICR line, so their radius is the offset itself.
+      const double Wr_front = Ws * lat_r / turning_radius;
+      const double Wl_front = Ws * lat_l / turning_radius;
+
+      // Rear wheels sit one wheelbase behind that line, so their radius is the
+      // hypotenuse of their OWN triangle. The previous form divided by
+      // cos(phi_IK) -- the centreline's angle -- which is exact only at zero
+      // track width. On a real track it under-drove the inner rear wheel by up
+      // to 38% at full lock, dragging it through every turn.
+      // copysign keeps the sign convention the front wheels already use, so
+      // this stays correct when turning_radius is negative on the other lock.
       const double Wr_rear =
-        Ws * (turning_radius + wheel_track_ * 0.5) / (turning_radius * std::cos(phi_IK));
+        Ws * std::copysign(std::hypot(lat_r, wheelbase_), lat_r) / turning_radius;
       const double Wl_rear =
-        Ws * (turning_radius - wheel_track_ * 0.5) / (turning_radius * std::cos(phi_IK));
+        Ws * std::copysign(std::hypot(lat_l, wheelbase_), lat_l) / turning_radius;
 
       traction_commands = {Wr_front, Wl_front, Wr_rear, Wl_rear};
 
